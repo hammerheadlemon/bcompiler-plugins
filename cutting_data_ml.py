@@ -7,7 +7,8 @@ HOME = os.path.abspath(os.path.expanduser('~'))
 DESKTOP = os.path.join(HOME, 'Desktop')
 
 
-def milestone_swimlane(start_row, project_number, newwb, block_start_row=90):
+def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
+                       interested_range=365):
 
     newsheet = newwb.active
     col = project_number + 1
@@ -15,7 +16,7 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90):
 
     wb = openpyxl.load_workbook(
         os.path.join(
-            DESKTOP, 'compiled_master_2017-07-18_Q1 Apr - Jun 2017 FOR Q2 COMMISSION DO NOT CHANGE.xlsx'))
+            DESKTOP, 'Q1_1718_master.xlsx'))
     sheet = wb.active
 
     # print project title
@@ -28,7 +29,7 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90):
         newsheet.cell(row=x, column=1, value=val)
         x += 1
     x = start_row
-    for i in range(block_start_row + 1, 269, 6):
+    for i in range(block_start_row + 1, 270, 6):
         val = sheet.cell(row=i, column=col).value
         newsheet.cell(row=x, column=2, value=val)
         x += 1
@@ -39,7 +40,7 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90):
         time_line_date = sheet.cell(row=i, column=col).value
         try:
             difference = (time_line_date - today).days
-            if difference in range(1, 5000):
+            if difference in range(1, interested_range):
                 newsheet.cell(row=current_row, column=3, value=difference)
         except TypeError:
                 pass
@@ -80,8 +81,8 @@ def main():
     wb = openpyxl.Workbook()
     for p in range(1, 31):
         proj_num, st_row = _row_calc(p)
-        wb = milestone_swimlane(st_row, proj_num, wb, block_start_row=90)
-    wb.save('output.xlsx')
+        wb = milestone_swimlane(st_row, proj_num, wb, block_start_row=90, interested_range=365)
+    wb.save(os.path.join(DESKTOP, 'output.xlsx'))
 
 
 if __name__ == "__main__":
