@@ -51,19 +51,23 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
         newsheet.cell(row=i, column=4, value=project_number)
 
 
-#   chart = ScatterChart()
-#   chart.title = "Scatter Chart"
-#   chart.style = 1
-#   chart.x_axis.title = 'Date'
-#   chart.y_axis.title = 'Project No'
-#
-#   xvalues = Reference(newsheet, min_col=3, min_row=1, max_row=30)
-#   for i in range(1, 31):
-#       values = Reference(newsheet, min_col=4, min_row=1, max_row=30)
-#       series = Series(values, xvalues, title_from_data=True)
-#       chart.series.append(series)
-#
-#   newsheet.add_chart(chart, "A10")
+    chart = ScatterChart()
+    chart.title = "Scatter Chart"
+    chart.style = 1
+    chart.x_axis.title = 'Date'
+    chart.y_axis.title = 'Project No'
+
+    xvalues = Reference(newsheet, min_col=3, min_row=start_row, max_row=start_row + 30)
+    values = Reference(newsheet, min_col=4, min_row=start_row, max_row=start_row + 30)
+    series = Series(values, xvalues, title_from_data=True)
+    chart.series.append(series)
+
+    s1 = chart.series[0]
+    s1.marker.symbol = "triangle"
+    s1.marker.graphicalProperties.solidFill = "FF0000" # Marker filling
+    s1.marker.graphicalProperties.line.solidFill = "FF0000" # Marker outline
+
+    newsheet.add_chart(chart, "E{}".format(start_row))
 
     return newwb
 
