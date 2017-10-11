@@ -10,12 +10,15 @@ def milestone_swimlane(col, start_row, project_number, newwb):
     wb = openpyxl.load_workbook('/home/lemon/Downloads/compiled_master_2017-07-18_Q1 Apr - Jun 2017 FOR Q2 COMMISSION DO NOT CHANGE.xlsx')
     sheet = wb.active
 
-    x = 1
+    # print project title
+    newsheet.cell(row=1, column=1, value=sheet.cell(row=1, column=col).value)
+
+    x = 2
     for i in range(90, 269, 6):
         val = sheet.cell(row=i, column=col).value
         newsheet.cell(row=x, column=1, value=val)
         x += 1
-    x = 1
+    x = 2
     for i in range(91, 269, 6):
         val = sheet.cell(row=i, column=col).value
         newsheet.cell(row=x, column=2, value=val)
@@ -35,7 +38,7 @@ def milestone_swimlane(col, start_row, project_number, newwb):
         finally:
             counter += 1
 
-    for i in range(1, 31):
+    for i in range(2, 32):
         newsheet.cell(row=i, column=4, value=project_number)
 
 
