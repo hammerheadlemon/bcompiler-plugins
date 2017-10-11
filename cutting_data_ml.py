@@ -1,15 +1,21 @@
+import os
 import openpyxl
 import datetime
 from openpyxl.chart import ScatterChart, Reference, Series
 
+HOME = os.path.abspath(os.path.expanduser('~'))
+DESKTOP = os.path.join(HOME, 'Desktop')
 
-def milestone_swimlane(start_row, project_number, newwb):
+
+def milestone_swimlane(start_row, project_number, newwb, block_start_row=90):
 
     newsheet = newwb.active
     col = project_number + 1
     start_row = start_row + 1
 
-    wb = openpyxl.load_workbook('/home/lemon/Downloads/compiled_master_2017-07-18_Q1 Apr - Jun 2017 FOR Q2 COMMISSION DO NOT CHANGE.xlsx')
+    wb = openpyxl.load_workbook(
+        os.path.join(
+            DESKTOP, 'compiled_master_2017-07-18_Q1 Apr - Jun 2017 FOR Q2 COMMISSION DO NOT CHANGE.xlsx'))
     sheet = wb.active
 
     # print project title
@@ -17,12 +23,12 @@ def milestone_swimlane(start_row, project_number, newwb):
     print(sheet.cell(row=1, column=col).value)
 
     x = start_row
-    for i in range(90, 269, 6):
+    for i in range(block_start_row, 269, 6):
         val = sheet.cell(row=i, column=col).value
         newsheet.cell(row=x, column=1, value=val)
         x += 1
     x = start_row
-    for i in range(91, 269, 6):
+    for i in range(block_start_row + 1, 269, 6):
         val = sheet.cell(row=i, column=col).value
         newsheet.cell(row=x, column=2, value=val)
         x += 1
@@ -74,7 +80,7 @@ def main():
     wb = openpyxl.Workbook()
     for p in range(1, 31):
         proj_num, st_row = _row_calc(p)
-        wb = milestone_swimlane(st_row, proj_num, wb)
+        wb = milestone_swimlane(st_row, proj_num, wb, block_start_row=90)
     wb.save('output.xlsx')
 
 
