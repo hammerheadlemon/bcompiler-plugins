@@ -13,19 +13,19 @@ def milestone_swimlane(col, start_row, project_number, newwb):
     # print project title
     newsheet.cell(row=1, column=1, value=sheet.cell(row=1, column=col).value)
 
-    x = 2
+    x = start_row
     for i in range(90, 269, 6):
         val = sheet.cell(row=i, column=col).value
         newsheet.cell(row=x, column=1, value=val)
         x += 1
-    x = 2
+    x = start_row
     for i in range(91, 269, 6):
         val = sheet.cell(row=i, column=col).value
         newsheet.cell(row=x, column=2, value=val)
         x += 1
 
     today = datetime.datetime.today()
-    counter = 1
+    counter = 2
     for i in range(91, 269, 6):
         time_line_date = sheet.cell(row=i, column=col).value
         try:
@@ -61,7 +61,7 @@ def milestone_swimlane(col, start_row, project_number, newwb):
 
 wb = openpyxl.Workbook()
 proj_num = 1
-st_row = 1
+st_row = 2
 wb = milestone_swimlane(3, st_row, proj_num, wb)
 wb.save('output.xlsx')
 
