@@ -24,7 +24,7 @@ def milestone_swimlane(col, start_row, project_number, newwb):
     today = datetime.datetime.today()
     counter = 1
     for i in range(91, 269, 6):
-        time_line_date = sheet.cell(row=i, column=2).value
+        time_line_date = sheet.cell(row=i, column=col).value
         try:
             difference = (time_line_date - today).days
             print(difference)
@@ -59,7 +59,7 @@ def milestone_swimlane(col, start_row, project_number, newwb):
 wb = openpyxl.Workbook()
 proj_num = 1
 st_row = 1
-wb = milestone_swimlane(2, st_row, proj_num, wb)
+wb = milestone_swimlane(3, st_row, proj_num, wb)
 wb.save('output.xlsx')
 
 
