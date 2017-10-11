@@ -22,18 +22,20 @@ def milestone_swimlane(col, start_row, project_number, newwb):
         x += 1
 
     today = datetime.datetime.today()
-    import pdb; pdb.set_trace()  # XXX BREAKPOINT
+    counter = 1
     for i in range(91, 269, 6):
         time_line_date = sheet.cell(row=i, column=2).value
         try:
             difference = (time_line_date - today).days
             print(difference)
             if difference in range(1, 5000):
-                newsheet.cell(row=i, column=3, value=difference)
+                newsheet.cell(row=counter, column=3, value=difference)
         except TypeError:
                 pass
+        finally:
+            counter += 1
 
-    for i in range(1, 30):
+    for i in range(1, 31):
         newsheet.cell(row=i, column=4, value=project_number)
 
 
@@ -53,16 +55,12 @@ def milestone_swimlane(col, start_row, project_number, newwb):
 
     return newwb
 
-st_row = 90
+
+wb = openpyxl.Workbook()
 proj_num = 1
-newwb = openpyxl.Workbook()
-for column in range(2, 33):
-        print("Doing project {}".format(proj_num))
-        wb = milestone_swimlane(column, st_row, proj_num, newwb)
-        st_row = st_row + wb[1]
-        proj_num = proj_num + 1
-        newwb = wb[0]
-wb[0].save('output.xlsx')
+st_row = 1
+wb = milestone_swimlane(2, st_row, proj_num, wb)
+wb.save('output.xlsx')
 
 
 
