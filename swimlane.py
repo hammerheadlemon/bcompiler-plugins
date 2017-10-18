@@ -6,10 +6,11 @@ from openpyxl.chart import ScatterChart, Reference, Series
 HOME = os.path.abspath(os.path.expanduser('~'))
 DESKTOP = os.path.join(HOME, 'Desktop')
 
+NUMBER_OF_PROJECTS = 10
+
 
 def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
                        interested_range=365):
-
     newsheet = newwb.active
     col = project_number + 1
     start_row = start_row + 1
@@ -43,7 +44,7 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
             if difference in range(1, interested_range):
                 newsheet.cell(row=current_row, column=3, value=difference)
         except TypeError:
-                pass
+            pass
         finally:
             current_row += 1
 
@@ -53,26 +54,21 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
     return newwb, start_row
 
 
-def universal_chart(workbook, start_row):
-    sheet = workbook.active
-
-    chart = ScatterChart()
-    chart.title = "Swimlane Chart"
-    chart.style = 1
-    chart.x_axis.title = 'Date'
-    chart.y_axis.title = 'Project No'
-
-    xvalues = Reference(sheet, min_col=3, min_row=start_row, max_row=start_row + 682)
-    values = Reference(sheet, min_col=4, min_row=start_row, max_row=start_row + 682)
+def _build_chart(sheet, start_row):
+    xvalues = Reference(sheet, min_col=3, min_row=start_row, max_row=start_row + 29)
+    values = Reference(sheet, min_col=4, min_row=start_row, max_row=start_row + 29)
     series = Series(values, xvalues, title_from_data=True)
-    chart.series.append(series)
+    return series
 
-    s1 = chart.series[0]
-    s1.marker.symbol = "triangle"
-    s1.marker.graphicalProperties.solidFill = "FF0000" # Marker filling
-    s1.marker.graphicalProperties.line.solidFill = "FF0000" # Marker outline
 
-    sheet.add_chart(chart, "E{}".format(start_row))
+def _start_cells():
+    total_rows = NUMBER_OF_PROJECTS * 30
+    for i in range(2, total_rows, 31):
+        yield i
+
+
+def _row_calc_chart(start_row):
+    return start_row + 29
 
 
 def _row_calc(project_number):
@@ -86,14 +82,28 @@ def _row_calc(project_number):
 
 def main():
     wb = openpyxl.Workbook()
+    start_generator = _start_cells()
     for p in range(1, 31):
         proj_num, st_row = _row_calc(p)
         wb = milestone_swimlane(st_row, proj_num, wb, block_start_row=90, interested_range=365)[0]
-    universal_chart(wb, 1)
+
+    chart = ScatterChart()
+    chart.title = "Swimlane Chart"
+    chart.style = 1
+    chart.x_axis.title = 'Date'
+    chart.y_axis.title = 'Project No'
+
+    for p in range(1, 5):
+        start_row = next(start_generator)
+        series = _build_chart(wb.active, start_row)
+        series.marker.symbol = "triangle"
+        series.marker.graphicalProperties.solidFill = "FF0000"
+        series.marker.graphicalProperties.line.solidFill = "FF0000"  # Marker outline
+        chart.series.append(series)
+
+    wb.active.add_chart(chart, "E1")
     wb.save(os.path.join(DESKTOP, 'output.xlsx'))
 
 
 if __name__ == "__main__":
     main()
-
-
