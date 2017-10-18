@@ -6,7 +6,7 @@ from openpyxl.chart import ScatterChart, Reference, Series
 HOME = os.path.abspath(os.path.expanduser('~'))
 DESKTOP = os.path.join(HOME, 'Desktop')
 
-NUMBER_OF_PROJECTS = 10
+NUMBER_OF_PROJECTS = 20
 
 
 def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
@@ -54,11 +54,25 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
     return newwb, start_row
 
 
-def _build_chart(sheet, start_row):
-    xvalues = Reference(sheet, min_col=3, min_row=start_row, max_row=start_row + 29)
-    values = Reference(sheet, min_col=4, min_row=start_row, max_row=start_row + 29)
-    series = Series(values, xvalues, title_from_data=True)
-    return series
+def _segment_series():
+    cut = dict(
+        sobc=1,
+        obc=1,
+        ds1=4,
+        fbc=1,
+        ds2=4,
+        ds3=4,
+        free=8
+    )
+    for item in cut.items():
+        yield item
+
+def _series_producer(sheet, start_row, step):
+    xvalues = Reference(sheet, min_col=3, min_row=start_row, max_row=start_row + step)
+    values = Reference(sheet, min_col=4, min_row=start_row, max_row=start_row + step)
+    series = Series(values, xvalues)
+    new_start = start_row + step + 1
+    return series, new_start
 
 
 def _start_cells():
@@ -73,9 +87,9 @@ def _row_calc_chart(start_row):
 
 def _row_calc(project_number):
     if project_number == 1:
-        return (1, 1)
+        return 1, 1
     if project_number == 2:
-        return (2, 32)
+        return 2, 32
     else:
         return (project_number, (project_number + 30) + ((project_number - 2) * 30))
 
@@ -83,6 +97,7 @@ def _row_calc(project_number):
 def main():
     wb = openpyxl.Workbook()
     start_generator = _start_cells()
+    segment_series_generator = _segment_series()
     for p in range(1, 31):
         proj_num, st_row = _row_calc(p)
         wb = milestone_swimlane(st_row, proj_num, wb, block_start_row=90, interested_range=365)[0]
@@ -90,16 +105,30 @@ def main():
     chart = ScatterChart()
     chart.title = "Swimlane Chart"
     chart.style = 1
-    chart.x_axis.title = 'Date'
+    chart.x_axis.title = 'Days from Today'
     chart.y_axis.title = 'Project No'
 
-    for p in range(1, 5):
-        start_row = next(start_generator)
-        series = _build_chart(wb.active, start_row)
-        series.marker.symbol = "triangle"
-        series.marker.graphicalProperties.solidFill = "FF0000"
-        series.marker.graphicalProperties.line.solidFill = "FF0000"  # Marker outline
-        chart.series.append(series)
+    derived_end = 2
+
+    for p in range(1, NUMBER_OF_PROJECTS):
+        for i in range(1, 8):  # 8 here is hard-coded number of segments within a project series (ref: dict in _segment_series()
+            if i == 1:
+                inner_start_row = derived_end
+            else:
+                inner_start_row = derived_end
+            _inner_step = next(segment_series_generator)[1]
+            series, derived_end = _series_producer(wb.active, inner_start_row, _inner_step)
+            if _inner_step == 1:
+                series.marker.symbol = "triangle"
+                series.marker.graphicalProperties.solidFill = "01a852"
+            else:
+                series.marker.symbol = "square"
+                series.marker.graphicalProperties.solidFill = "FF0000"
+            series.marker.size = 10
+            chart.series.append(series)
+        start_generator = _start_cells()
+        segment_series_generator = _segment_series()
+        derived_end = derived_end + 1
 
     wb.active.add_chart(chart, "E1")
     wb.save(os.path.join(DESKTOP, 'output.xlsx'))
