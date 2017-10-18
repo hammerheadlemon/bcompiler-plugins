@@ -16,7 +16,7 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
 
     wb = openpyxl.load_workbook(
         os.path.join(
-            DESKTOP, 'Q1_1718_master.xlsx'))
+            DESKTOP, 'Q2_1718_master.xlsx'))
     sheet = wb.active
 
     # print project title
@@ -50,15 +50,20 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
     for i in range(start_row, start_row + 30):
         newsheet.cell(row=i, column=4, value=project_number)
 
+    return newwb, start_row
+
+
+def universal_chart(workbook, start_row):
+    sheet = workbook.active
 
     chart = ScatterChart()
-    chart.title = "Scatter Chart"
+    chart.title = "Swimlane Chart"
     chart.style = 1
     chart.x_axis.title = 'Date'
     chart.y_axis.title = 'Project No'
 
-    xvalues = Reference(newsheet, min_col=3, min_row=start_row, max_row=start_row + 30)
-    values = Reference(newsheet, min_col=4, min_row=start_row, max_row=start_row + 30)
+    xvalues = Reference(sheet, min_col=3, min_row=start_row, max_row=start_row + 682)
+    values = Reference(sheet, min_col=4, min_row=start_row, max_row=start_row + 682)
     series = Series(values, xvalues, title_from_data=True)
     chart.series.append(series)
 
@@ -67,9 +72,7 @@ def milestone_swimlane(start_row, project_number, newwb, block_start_row=90,
     s1.marker.graphicalProperties.solidFill = "FF0000" # Marker filling
     s1.marker.graphicalProperties.line.solidFill = "FF0000" # Marker outline
 
-    newsheet.add_chart(chart, "E{}".format(start_row))
-
-    return newwb
+    sheet.add_chart(chart, "E{}".format(start_row))
 
 
 def _row_calc(project_number):
@@ -85,7 +88,8 @@ def main():
     wb = openpyxl.Workbook()
     for p in range(1, 31):
         proj_num, st_row = _row_calc(p)
-        wb = milestone_swimlane(st_row, proj_num, wb, block_start_row=90, interested_range=365)
+        wb = milestone_swimlane(st_row, proj_num, wb, block_start_row=90, interested_range=365)[0]
+    universal_chart(wb, 1)
     wb.save(os.path.join(DESKTOP, 'output.xlsx'))
 
 
